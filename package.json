@@ -1,0 +1,26 @@
+{
+  "name": "convict-provider-awsssm",
+  "version": "0.0.1",
+  "description": "An external provider for node-convict which allows you to get paramter values from AWS SSM's parameter store.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HBKEngineering/convict-provider-awsSsm.git"
+  },
+  "author": "Brett Neese, HBK Engineering <bneese@hbkengineering.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HBKEngineering/convict-provider-awsSsm/issues"
+  },
+  "homepage": "https://github.com/HBKEngineering/convict-provider-awsSsm#readme",
+  "dependencies": {
+    "aws-param-store": "^1.0.1",
+    "lodash.foreach": "^4.5.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.167.0"
+  }
+}
