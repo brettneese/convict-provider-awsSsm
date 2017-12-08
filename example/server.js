@@ -3,7 +3,7 @@
 const path = require("path");
 const http = require("http");
 const convict = require("../lib/convict.js");
-const AwsProvider = require("./provider");
+const AwsProvider = require("../index");
 
 let provider = new AwsProvider("/test/stag/");
 convict.configureProvider(provider.get);
