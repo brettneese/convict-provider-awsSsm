@@ -6,7 +6,7 @@ const convict = require("../lib/convict.js");
 const AwsProvider = require("./provider");
 
 let provider = new AwsProvider("/test/stag/");
-convict.configureProvider(provider.getValue);
+convict.configureProvider(provider.get);
 
 let conf = convict({
   ip: {
