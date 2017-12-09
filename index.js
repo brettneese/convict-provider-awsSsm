@@ -3,19 +3,27 @@ const _each = require('lodash.foreach');
 const awsParamStore = require('aws-param-store');
 var results = {};
 
-class paramStoreProvider {
-  constructor(basePath) {
-    let parameters = awsParamStore.newQuery(basePath).executeSync();
-
-    _each(parameters, function(requestResult) {
-      let key = requestResult.Name.split('/').pop();
-      results[key] = requestResult.Value;
-    });
-  }
-  
-  get(key) {
-    return results[key];
-  }
+function getBasePath(path) {
+  var a = path.split('/');
+  a.pop();
+  return a.join('/');
 }
 
-module.exports = paramStoreProvider;
+module.exports = function(path) {
+  let key = path.split('/').pop();
+  let r = {};
+  let basePath = getBasePath(path);
+
+  if (!results[basePath]) {
+
+    let parameters = awsParamStore.newQuery(basePath).executeSync();
+    _each(parameters, function(requestResult) {
+      let k = requestResult.Name.split('/').pop();
+      r[k] = requestResult.Value;
+    });
+
+    results[basePath] = r;
+  }
+
+  return results[basePath][key];
+};
