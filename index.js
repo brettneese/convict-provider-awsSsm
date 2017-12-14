@@ -25,10 +25,10 @@ module.exports = function(path) {
   // declare a local results object
   let r = {};
 
-  // if we don't already have results globally from this particular path, go ahead and query AWS
-  if (!results[basePath]) {
-    // do this sync because we need variables before app bootup anyway
-    try {
+  try {
+    // if we don't already have results globally from this particular path, go ahead and query AWS
+    if (!results[basePath]) {
+      // do this sync because we need variables before app bootup anyway
       let parameters = awsParamStore.newQuery(basePath).executeSync();
 
       // filter through the results and give them a nice key/value structure
@@ -39,11 +39,11 @@ module.exports = function(path) {
 
       // add the results from the query to the global results object keyed under their basepath
       results[basePath] = r;
-
-      return results[basePath][key];
-
-    } catch (err) {
-      console.log(err);
     }
+
+    // return the results for this particular basePath/key pair
+    return results[basePath][key];
+  } catch (err) {
+    console.log(err);
   }
 };
