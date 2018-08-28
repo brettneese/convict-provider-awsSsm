@@ -59,7 +59,7 @@ module.exports = function(path) {
       // return the results for this particular basePath/key pair
       return results[basePath][key];
     } catch (err) {
-      throw new Error(err);
+      throw err;
     }
   }
 };
