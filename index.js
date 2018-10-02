@@ -4,6 +4,9 @@ const awsParamStore = require("aws-param-store");
 const AWS = require("aws-sdk");
 const AWSConfig = new AWS.Config();
 
+const DEFAULT_MAX_ATTEMPTS = 3; // try to get the params up to r times
+const DEFAULT_RETRY_INCREMENT = 500; // increment by 500ms for every retry
+
 // declare a global results object
 var results = {};
 
@@ -11,6 +14,31 @@ function getBasePath(path) {
   var a = path.split("/");
   a.pop();
   return a.join("/");
+}
+
+/// this is terrible, but we really do need to sleep the thread for it to work
+function sleep(time, callback) {
+  var stop = new Date().getTime();
+  while (new Date().getTime() < stop + time) {}
+  callback();
+}
+
+function getParameters(basePath, retry, maxAttempts = DEFAULT_MAX_ATTEMPTS, retryIncrement = DEFAULT_RETRY_INCREMENT, attempts = 1) {
+
+  try {
+    let parameters = awsParamStore.getParametersByPathSync("hahahahg");
+    return parameters;
+  } catch (e) {
+    if (retry && e.message == "Rate exceeded" && attempts < retryOpts.maxAttempts) {
+      attempts = attempts + 1;
+
+      sleep(attempts * retryOpts.retryIncrement, function() {
+        return getParameters(basePath, attempts);
+      });
+    } else {
+      throw e;
+    }
+  }
 }
 
 module.exports = function(path) {
@@ -40,26 +68,21 @@ module.exports = function(path) {
     // declare a local results object
     let r = {};
 
-    try {
-      // if we don't already have results globally from this particular path, go ahead and query AWS
-      if (!results[basePath]) {
-        // do this sync because we need variables before app bootup anyway
-        let parameters = awsParamStore.newQuery(basePath).executeSync();
+    // if we don't already have results globally from this particular path, go ahead and query AWS
+    if (!results[basePath]) {
+      let parameters = getParameters(basePath, true);
 
-        // filter through the results and give them a nice key/value structure
-        _each(parameters, function(requestResult) {
-          let k = requestResult.Name.split("/").pop();
-          r[k] = requestResult.Value;
-        });
+      // filter through the results and give them a nice key/value structure
+      _each(parameters, function(requestResult) {
+        let k = requestResult.Name.split("/").pop();
+        r[k] = requestResult.Value;
+      });
 
-        // add the results from the query to the global results object keyed under their basepath
-        results[basePath] = r;
-      }
-
-      // return the results for this particular basePath/key pair
-      return results[basePath][key];
-    } catch (err) {
-      throw err;
+      // add the results from the query to the global results object keyed under their basepath
+      results[basePath] = r;
     }
+
+    // return the results for this particular basePath/key pair
+    return results[basePath][key];
   }
 };
