@@ -4,6 +4,10 @@ const awsParamStore = require("aws-param-store");
 const AWS = require("aws-sdk");
 const AWSConfig = new AWS.Config();
 
+let RETRY = false;
+let MAX_ATTEMPTS = 3; // try to get the params up to r times
+let RETRY_INCREMENT = 500; // increment by 500ms for every retry
+
 // declare a global results object
 var results = {};
 
@@ -13,7 +17,37 @@ function getBasePath(path) {
   return a.join("/");
 }
 
-module.exports = function(path) {
+/// this is terrible, but we really do need to sleep the thread for it to work
+function sleep(time, callback) {
+  var stop = new Date().getTime();
+  while (new Date().getTime() < stop + time) {}
+  callback();
+}
+
+// prettier-ignore
+function getParameters(basePath, attempts) {
+
+  if(!attempts) attempts = 1;
+
+  try {
+    let parameters = awsParamStore.getParametersByPathSync(basePath);
+    return parameters;
+  } catch (e) {
+
+    // prettier-ignore
+    if (RETRY && e.message == "Rate exceeded"  && attempts < MAX_ATTEMPTS) {
+      attempts = attempts + 1;
+
+      sleep(attempts * RETRY_INCREMENT, function() {
+        return getParameters(basePath, attempts);
+      });
+    } else {
+      throw e;
+    }
+  }
+}
+
+function provider(path) {
   if (AWSConfig.credentials == null) {
     console.log(
       "WARNING: No AWS credentials, not connecting to SSM for secrets..."
@@ -40,26 +74,31 @@ module.exports = function(path) {
     // declare a local results object
     let r = {};
 
-    try {
-      // if we don't already have results globally from this particular path, go ahead and query AWS
-      if (!results[basePath]) {
-        // do this sync because we need variables before app bootup anyway
-        let parameters = awsParamStore.newQuery(basePath).executeSync();
+    // if we don't already have results globally from this particular path, go ahead and query AWS
+    if (!results[basePath]) {
+      let parameters = getParameters(basePath);
 
-        // filter through the results and give them a nice key/value structure
-        _each(parameters, function(requestResult) {
-          let k = requestResult.Name.split("/").pop();
-          r[k] = requestResult.Value;
-        });
+      // filter through the results and give them a nice key/value structure
+      _each(parameters, function(requestResult) {
+        let k = requestResult.Name.split("/").pop();
+        r[k] = requestResult.Value;
+      });
 
-        // add the results from the query to the global results object keyed under their basepath
-        results[basePath] = r;
-      }
-
-      // return the results for this particular basePath/key pair
-      return results[basePath][key];
-    } catch (err) {
-      throw err;
+      // add the results from the query to the global results object keyed under their basepath
+      results[basePath] = r;
     }
+
+    // return the results for this particular basePath/key pair
+    return results[basePath][key];
   }
+}
+
+module.exports = function(path, opts) {
+  if (opts) {
+    if (opts.retry) RETRY = true;
+    if (opts.maxAttempts) MAX_ATTEMPTS = opts.maxAttempts;
+    if (opts.retryIncrement) RETRY_INCREMENT = opts.retryIncrement;
+  }
+
+  return provider;
 };
