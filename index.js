@@ -4,8 +4,9 @@ const awsParamStore = require("aws-param-store");
 const AWS = require("aws-sdk");
 const AWSConfig = new AWS.Config();
 
-const DEFAULT_MAX_ATTEMPTS = 3; // try to get the params up to r times
-const DEFAULT_RETRY_INCREMENT = 500; // increment by 500ms for every retry
+let RETRY = false;
+let MAX_ATTEMPTS = 3; // try to get the params up to r times
+let RETRY_INCREMENT = 500; // increment by 500ms for every retry
 
 // declare a global results object
 var results = {};
@@ -23,12 +24,14 @@ function sleep(time, callback) {
   callback();
 }
 
-function getParameters(basePath, retry, maxAttempts = DEFAULT_MAX_ATTEMPTS, retryIncrement = DEFAULT_RETRY_INCREMENT, attempts = 1) {
-
+// prettier-ignore
+function getParameters(basePath, retry = RETRY, maxAttempts = MAX_ATTEMPTS, retryIncrement = RETRY_INCREMENT, attempts = 1) {
   try {
-    let parameters = awsParamStore.getParametersByPathSync("hahahahg");
+    let parameters = awsParamStore.getParametersByPathSync(basePath);
     return parameters;
   } catch (e) {
+
+    // prettier-ignore
     if (retry && e.message == "Rate exceeded" && attempts < retryOpts.maxAttempts) {
       attempts = attempts + 1;
 
@@ -41,7 +44,7 @@ function getParameters(basePath, retry, maxAttempts = DEFAULT_MAX_ATTEMPTS, retr
   }
 }
 
-module.exports = function(path) {
+function provider(path) {
   if (AWSConfig.credentials == null) {
     console.log(
       "WARNING: No AWS credentials, not connecting to SSM for secrets..."
@@ -70,7 +73,7 @@ module.exports = function(path) {
 
     // if we don't already have results globally from this particular path, go ahead and query AWS
     if (!results[basePath]) {
-      let parameters = getParameters(basePath, true);
+      let parameters = getParameters(basePath);
 
       // filter through the results and give them a nice key/value structure
       _each(parameters, function(requestResult) {
@@ -85,4 +88,15 @@ module.exports = function(path) {
     // return the results for this particular basePath/key pair
     return results[basePath][key];
   }
+}
+
+
+module.exports = function(path, opts) {
+  if (opts) {
+    if (opts.retry) RETRY = true;
+    if (opts.maxAttempts) MAX_ATTEMPTS = opts.maxAttempts;
+    if (opts.retryIncrement) RETRY_INCREMENT = opts.retryIncrement;
+  }
+
+  return provider;
 };
