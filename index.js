@@ -25,17 +25,20 @@ function sleep(time, callback) {
 }
 
 // prettier-ignore
-function getParameters(basePath, retry = RETRY, maxAttempts = MAX_ATTEMPTS, retryIncrement = RETRY_INCREMENT, attempts = 1) {
+function getParameters(basePath, attempts) {
+
+  if(!attempts) attempts = 1;
+
   try {
     let parameters = awsParamStore.getParametersByPathSync(basePath);
     return parameters;
   } catch (e) {
 
     // prettier-ignore
-    if (retry && e.message == "Rate exceeded" && attempts < retryOpts.maxAttempts) {
+    if (RETRY && e.message == "Rate exceeded"  && attempts < MAX_ATTEMPTS) {
       attempts = attempts + 1;
 
-      sleep(attempts * retryOpts.retryIncrement, function() {
+      sleep(attempts * RETRY_INCREMENT, function() {
         return getParameters(basePath, attempts);
       });
     } else {
@@ -89,7 +92,6 @@ function provider(path) {
     return results[basePath][key];
   }
 }
-
 
 module.exports = function(path, opts) {
   if (opts) {
