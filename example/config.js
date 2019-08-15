@@ -1,9 +1,9 @@
 "use strict";
 
-const convict = require("@hbkapps/convict");
-convict.configureProvider(require("../index"));
+const convict = require("convict");
+// convict.configureProvider(require("../index"));
 
-module.exports = convict({
+let config = convict({
   ip: {
     default: "127.0.0.1",
     format: "ipaddress",
@@ -14,4 +14,8 @@ module.exports = convict({
     format: "port",
     providerPath: "/test/PORT"
   }
-}).validate().getProperties();
+});
+
+let c = require("../index")(config);
+
+// config = config.load();

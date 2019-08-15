@@ -14,6 +14,8 @@ function getBasePath(path) {
 }
 
 module.exports = function(path) {
+  path.getProperties();
+  
   if (AWSConfig.credentials == null) {
     console.log(
       "WARNING: No AWS credentials, not connecting to SSM for secrets..."
