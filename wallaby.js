@@ -12,7 +12,7 @@ module.exports = function() {
     },
     files: [
       { pattern: "lib/**.js", load: true },
-      { pattern: "lib/aws-param-store/lib/**.js", load: true },
+      { pattern: "lib/test/hooks.js", load: true },
       { pattern: "lib/**.spec.js", ignore: true },
       { pattern: "node_modules/**", ignore: true },
       { pattern: "node_modules/aws-param-store/**", ignore: false }
