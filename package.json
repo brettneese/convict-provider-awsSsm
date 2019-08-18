@@ -7,7 +7,9 @@
     "index.js"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pretest": "docker run -d --name localstack -p 4567-4597:4567-4597 -p 8080:8080 -e SERVICES='ssm' localstack/localstack; sleep 10",
+    "test": "mocha lib/*.spec.js",
+    "posttest": "docker rm -f localstack"
   },
   "repository": {
     "type": "git",
@@ -20,9 +22,11 @@
   },
   "homepage": "https://github.com/HBKEngineering/convict-provider-awsSsm#readme",
   "dependencies": {
-    "aws-param-store": "^1.0.1",
+    "aws-param-store": "^3.0.0",
+    "chai": "^4.2.0",
     "convict": "^5.1.0",
-    "lodash.foreach": "^4.5.0"
+    "lodash.foreach": "^4.5.0",
+    "mocha": "^6.2.0"
   },
   "devDependencies": {
     "aws-sdk": "^2.167.0"

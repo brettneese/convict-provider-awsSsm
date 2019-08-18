@@ -1,9 +1,9 @@
 "use strict";
 
 const convict = require("convict");
-// convict.configureProvider(require("../index"));
+const provider = require("./index")
 
-let config = convict({
+let configSchema = {
   ip: {
     default: "127.0.0.1",
     format: "ipaddress",
@@ -14,8 +14,8 @@ let config = convict({
     format: "port",
     providerPath: "/test/PORT"
   }
-});
+}
 
-let c = require("../index")(config);
+let config = convict(configSchema).load(configSchema);
 
 // config = config.load();
