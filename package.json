@@ -22,12 +22,13 @@
   },
   "homepage": "https://github.com/HBKEngineering/convict-provider-awsSsm#readme",
   "dependencies": {
-    "aws-param-store": "^3.0.0",
+    "aws-param-store": "^3.0.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.167.0",
+    "sinon": "^7.4.1",
     "chai": "^4.2.0",
     "convict": "^5.1.0",
     "mocha": "^6.2.0"
-  },
-  "devDependencies": {
-    "aws-sdk": "^2.167.0"
   }
 }
