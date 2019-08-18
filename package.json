@@ -25,7 +25,6 @@
     "aws-param-store": "^3.0.0",
     "chai": "^4.2.0",
     "convict": "^5.1.0",
-    "lodash.foreach": "^4.5.0",
     "mocha": "^6.2.0"
   },
   "devDependencies": {
