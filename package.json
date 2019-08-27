@@ -23,6 +23,7 @@
   "homepage": "https://github.com/HBKEngineering/convict-provider-awsSsm#readme",
   "dependencies": {
     "aws-param-store": "^3.0.0",
+    "convict-provider-utils": "0.0.4",
     "lodash": "^4.17.15"
   },
   "devDependencies": {
