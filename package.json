@@ -26,5 +26,8 @@
   "devDependencies": {
     "@hbkapps/convict": "^4.1.0",
     "aws-sdk": "^2.167.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }
