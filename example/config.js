@@ -1,17 +1,18 @@
 "use strict";
 
-const convict = require("@hbkapps/convict");
-convict.configureProvider(require("../index"));
+const convict = require("convict");
+const getParams = require("../index");
 
-module.exports = convict({
+const config = {
   ip: {
     default: "127.0.0.1",
-    format: "ipaddress",
-    providerPath: "/test/foo/ip" // can use multiple basePaths, and we'll only need to contact AWS once per path
   },
   port: {
     default: 0,
     format: "port",
-    providerPath: "/test/PORT"
-  }
-}).validate().getProperties();
+  },
+};
+
+const ssmParams = getParams("/example-app/");
+
+module.exports = convict(config).load(ssmParams).validate().getProperties();
