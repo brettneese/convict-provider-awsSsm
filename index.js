@@ -33,7 +33,7 @@ module.exports = function (rootPath) {
       const name = element.Name.split(rootPath)[1];
       output[name] = element.Value;
     });
-
-    return output;
   }
+
+  return output;
 };
