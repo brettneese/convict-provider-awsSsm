@@ -1,6 +1,6 @@
 {
   "name": "@hbkengineering/convict-provider-awsssm",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "description": "An external provider for node-convict which allows you to get paramter values from AWS SSM's parameter store.",
   "main": "index.js",
   "files": [
