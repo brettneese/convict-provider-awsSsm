@@ -13,6 +13,8 @@ function getBasePath(path) {
 }
 
 module.exports = function (rootPath) {
+  let output = {};
+
   if (AWSConfig.credentials == null) {
     console.log(
       "WARNING: No AWS credentials, not connecting to SSM for secrets..."
@@ -26,7 +28,6 @@ module.exports = function (rootPath) {
       "INFO: AWS_SSM is set to false, not connecting to SSM for secrets..."
     );
   } else {
-    let output = {};
     let parameters = awsParamStore.getParametersByPathSync(rootPath);
 
     parameters.forEach((element) => {
