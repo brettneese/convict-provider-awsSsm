@@ -15,6 +15,11 @@ function getBasePath(path) {
 module.exports = function (rootPath) {
   let output = {};
 
+  // for rootPaths that don't end in "/", add it
+  if (rootPath.length - 1 != "/") {
+    rootPath = rootPath + "/";
+  }
+
   if (AWSConfig.credentials == null) {
     console.log(
       "WARNING: No AWS credentials, not connecting to SSM for secrets..."
